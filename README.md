@@ -51,6 +51,8 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 ページは **GitHub Pages** で公開しています。`main` に push すると、GitHub Actions（`.github/workflows/deploy.yml`）が自動でビルドして公開します。
 サービス全体の設定は `public/config.js` の1か所だけです（配信者ごとの設定はありません）。
 
+> いまの状態（2026-09-29）：0（GitHub Pages）と 1（Firebase：プロジェクト `jpycspchat`）は設定ずみ。**のこりは 2 の Reown だけ**です。
+
 ### 0. GitHub Pages（最初の1回だけ）
 リポジトリの **Settings → Pages → Build and deployment → Source** を **「GitHub Actions」** にする。
 以後は push するたびに自動で公開されます（Actions のタブで進み具合が見られます）。
@@ -78,6 +80,7 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 
 ### 3. 公開
 `public/config.js` を書きかえて `main` に push するだけです。数分で https://sazinoki-2.github.io/JPYCspchat/ に反映されます。
+パソコンに何も入れなくても、GitHub の画面で `public/config.js` を開き、鉛筆マーク（Edit）で書きかえて「Commit changes」を押せば同じです。
 
 ### 秘密の情報について
 - このリポジトリに、秘密鍵・シードフレーズ（シークレットフレーズ）・パスワードは**一切入っていません**。今後も入れないでください。
