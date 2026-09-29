@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#5CCFF2">
+<title>JPYCスパチャ</title>
+<meta name="description" content="JPYCで投げ銭できるライブ配信のチャット欄">
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700;900&display=swap" rel="stylesheet">
+<!-- サービス全体の設定(Firebase・WalletConnectの番号など)。ビルドし直さなくても書きかえられるように別ファイル -->
+<script src="./config.js"></script>
+<script type="module" src="/src/main.js"></script>
+</head>
+<body>
+
+<!-- ===== ひらいたときのオープニング ===== -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="intro-stage">
+    <svg class="s" style="--x:14%;--y:17%;--w:clamp(76px,24vw,160px);--fx:-70vw;--fy:-50vh;--fr:-120deg;--d:0s" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46" fill="#FFCC00" stroke="#141414" stroke-width="4"/>
+    </svg>
+    <svg class="s" style="--x:83%;--y:76%;--w:clamp(86px,26vw,180px);--fx:60vw;--fy:50vh;--fr:140deg;--d:.05s" viewBox="0 0 100 92">
+      <path d="M50 5L95 87H5Z" fill="#FFFFFF" stroke="#141414" stroke-width="4"/>
+    </svg>
+    <svg class="s" style="--x:82%;--y:16%;--w:clamp(64px,18vw,124px);--fx:60vw;--fy:-55vh;--fr:-160deg;--rr:14deg;--d:.1s" viewBox="0 0 100 100">
+      <defs>
+        <pattern id="introHatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect width="9" height="9" fill="#FFFFFF"/><rect width="3.2" height="9" fill="#141414"/>
+        </pattern>
+      </defs>
+      <rect x="10" y="10" width="80" height="80" fill="url(#introHatch)" stroke="#141414" stroke-width="4"/>
+    </svg>
+    <svg class="s" style="--x:19%;--y:83%;--w:clamp(96px,30vw,210px);--fx:-60vw;--fy:55vh;--fr:70deg;--d:.15s" viewBox="0 0 200 40">
+      <path d="M6 32L30 8L54 32L78 8L102 32L126 8L150 32L174 8L194 28" fill="none" stroke="#141414" stroke-width="8"/>
+    </svg>
+    <svg class="s" style="--x:91%;--y:47%;--w:clamp(40px,11vw,74px);--fx:50vw;--fy:0vh;--fr:90deg;--d:.2s" viewBox="0 0 60 60">
+      <g fill="#141414">
+        <rect x="4" y="4" width="8" height="8"/><rect x="20" y="4" width="8" height="8"/><rect x="36" y="4" width="8" height="8"/><rect x="52" y="4" width="8" height="8"/>
+        <rect x="4" y="20" width="8" height="8"/><rect x="20" y="20" width="8" height="8"/><rect x="36" y="20" width="8" height="8"/><rect x="52" y="20" width="8" height="8"/>
+        <rect x="4" y="36" width="8" height="8"/><rect x="20" y="36" width="8" height="8"/><rect x="36" y="36" width="8" height="8"/><rect x="52" y="36" width="8" height="8"/>
+      </g>
+    </svg>
+    <svg class="s" style="--x:6%;--y:50%;--w:clamp(52px,15vw,104px);--fx:-45vw;--fy:6vh;--fr:-80deg;--rr:90deg;--d:.08s" viewBox="0 0 100 50">
+      <path d="M0 50A50 50 0 0 1 100 50Z" fill="#141414"/>
+    </svg>
+    <svg class="s" style="--x:47%;--y:8%;--w:clamp(110px,34vw,240px);--fx:0vw;--fy:-45vh;--fr:-25deg;--d:.13s" viewBox="0 0 220 40">
+      <path d="M8 20q13-16 26 0t26 0t26 0t26 0t26 0t26 0t26 0t26 0" fill="none" stroke="#141414" stroke-width="12"/>
+      <path d="M8 20q13-16 26 0t26 0t26 0t26 0t26 0t26 0t26 0t26 0" fill="none" stroke="#FFFFFF" stroke-width="5"/>
+    </svg>
+    <svg class="s" style="--x:50%;--y:91%;--w:clamp(32px,9vw,56px);--fx:0vw;--fy:45vh;--fr:200deg;--d:.18s" viewBox="0 0 40 40">
+      <path d="M15 3h10v12h12v10H25v12H15V25H3V15h12z" fill="#FFCC00" stroke="#141414" stroke-width="3"/>
+    </svg>
+    <svg class="s" style="--x:30%;--y:31%;--w:clamp(22px,6vw,40px);--fx:-30vw;--fy:-30vh;--fr:-200deg;--rr:180deg;--d:.22s" viewBox="0 0 40 36">
+      <path d="M20 2L38 34H2Z" fill="#141414"/>
+    </svg>
+
+    <div class="intro-logo">
+      <div class="intro-jpyc">JPYC</div>
+      <div class="intro-word" id="introWord">スパチャ</div>
+      <div class="intro-host"><i></i><span id="introHost"></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ページ全体の背景: 幾何学パーツを大きさ・角度を変えて散りばめる(src/bg.js が描く) ===== -->
+<div class="bgpat" id="bgpat" aria-hidden="true"></div>
+
+<!-- ===== チャット欄(配信者も視聴者もこの1枚) ===== -->
+<div class="app">
+  <section class="chat" id="chat" aria-label="JPYCスパチャ">
+
+    <header class="head" id="head">
+      <span class="mark" aria-hidden="true"></span>
+      <div class="brand">
+        <h1 class="title"><span class="t-jpyc">JPYC</span>スパチャ</h1>
+        <p class="host" id="host" hidden><b id="hostName"></b><span>のチャット欄</span></p>
+      </div>
+      <!-- 右上: 配信者のかたへ(YouTubeの「作成」ボタンと同じ考え方。押すとウィンドウが出る) -->
+      <button class="create-btn" id="createBtn" type="button" aria-haspopup="dialog" aria-label="配信者のかたへ" title="配信者のかたへ（自分のチャット欄をつくる）">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="2" y="6" width="14" height="12"/>
+          <path class="lens" d="M16 10.5L22 7v10l-6-3.5z"/>
+          <path class="plus" d="M9 9v6M6 12h6"/>
+        </svg>
+      </button>
+      <button class="snd" id="sndBtn" type="button" aria-label="効果音" aria-pressed="true">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path class="spk" d="M3 9h4l5-4v14l-5-4H3z"/>
+          <path class="wave" d="M15.5 9a4.5 4.5 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/>
+          <path class="mute" d="M16 9.5l5 5M21 9.5l-5 5"/>
+        </svg>
+      </button>
+      <!-- 右上のいちばん右: ウォレット接続(YouTubeのログイン・自分のアイコンと同じ場所) -->
+      <button class="wallet-btn" id="walletBtn" type="button" aria-haspopup="menu" aria-expanded="false">
+        <span class="ic" id="walletIc"></span>
+        <span class="wallet-label" id="walletLabel"><span class="long">ウォレット接続</span><span class="short">接続</span></span>
+      </button>
+      <svg class="orn" viewBox="0 0 80 80" aria-hidden="true">
+        <circle cx="62" cy="6" r="30" fill="#FFCC00" stroke="#141414" stroke-width="2.5"/>
+      </svg>
+    </header>
+    <div class="zig" aria-hidden="true"></div>
+
+    <!-- 右上のボタンを押したときのメニュー -->
+    <div class="menu" id="walletMenu" role="menu" hidden>
+      <p class="menu-me"><span class="ic" id="menuIc"></span><code id="menuAddr"></code></p>
+      <p class="menu-role" id="menuRole" hidden>このチャット欄の配信者です</p>
+      <button type="button" role="menuitem" id="menuOff">ウォレットを切る</button>
+    </div>
+
+    <div class="ticker" id="ticker" aria-label="最近の投げ銭"></div>
+
+    <div class="feed-wrap">
+      <div class="feed" id="feed" aria-live="polite"></div>
+      <button class="jump" id="jump" type="button" hidden>新しいスパチャ</button>
+      <div class="toast" id="toast" role="status" hidden></div>
+    </div>
+
+    <footer class="composer">
+      <div class="me">
+        <span class="ic" id="meIc"></span>
+        <input id="meName" maxlength="16" placeholder="なまえ" aria-label="なまえ" autocomplete="nickname">
+        <button class="me-addr" id="meAddr" type="button">ウォレット未接続</button>
+      </div>
+      <div class="row">
+        <input id="msgIn" maxlength="200" placeholder="コメントを書く…" aria-label="コメント" autocomplete="off" enterkeyhint="send">
+        <button class="jpyc" id="jpycBtn" type="button">JPYC<i aria-hidden="true"></i></button>
+      </div>
+    </footer>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-box">
+        <div class="sheet-zig" aria-hidden="true"></div>
+        <div class="sheet-in" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+          <div class="sheet-top">
+            <h2 id="sheetTitle">JPYCスパチャを送る</h2>
+            <button class="x" id="sheetX" type="button" aria-label="とじる"></button>
+          </div>
+          <p class="to-line">受け取り<b id="toName"></b><code id="toAddr"></code></p>
+
+          <div id="stepPick">
+            <article class="tip pv t2" id="pv">
+              <div class="card">
+                <div class="card-head">
+                  <span class="ic" id="pvIc"></span>
+                  <span class="name" id="pvName"></span>
+                  <span class="amt"><b id="pvAmt"></b><small>JPYC</small></span>
+                </div>
+                <div class="card-body">
+                  <textarea id="pvMsg" rows="2" placeholder="コメント（なしでもOK）" aria-label="コメント"></textarea>
+                  <span class="count" id="count"></span>
+                </div>
+              </div>
+            </article>
+            <div class="amounts" id="amounts" role="group" aria-label="金額（JPYC）"></div>
+            <p class="rule" id="rule"></p>
+            <button class="go-btn" id="goBtn" type="button">この内容で投げる<i aria-hidden="true"></i></button>
+            <p class="fine">Polygon の JPYC で送ります。承認のときにガス代（POL）が少しかかります。</p>
+            <details class="direct">
+              <summary>POLがない人はこちら</summary>
+              <div class="direct-in">
+                <div class="qr" id="directQr"></div>
+                <div>
+                  <p>HashPort Walletから、このアドレスに直接JPYCを送ってもOKです（HashPort Walletどうしならガス代なし）。コメントは付かず、アドレスの名前で流れます。</p>
+                  <code id="directAddr"></code>
+                  <button class="copy" id="copyBtn" type="button">アドレスをコピー</button>
+                </div>
+              </div>
+            </details>
+            <a class="promo" id="promo" href="#">配信者のかたへ：自分のチャット欄も無料でつくれます</a>
+          </div>
+
+          <div id="stepPay" hidden>
+            <ol class="steps" id="steps">
+              <li data-step="connect"><i></i>ウォレットをつなぐ</li>
+              <li data-step="approve"><i></i>ウォレットで承認する</li>
+              <li data-step="confirm"><i></i>チェーンで確認する</li>
+            </ol>
+            <p class="pay-msg" id="payMsg"></p>
+            <button class="back" id="backBtn" type="button">もどる</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 右上の「配信者」ボタンで、その場に重なって出るウィンドウ -->
+    <div class="modal" id="creator" hidden>
+      <div class="modal-win" id="creatorWin" role="dialog" aria-modal="true" aria-labelledby="creatorTitle"></div>
+    </div>
+  </section>
+</div>
+
+<!-- ===== 5,000 JPYC以上のときの大きな帯 ===== -->
+<div class="hype" id="hype" hidden aria-hidden="true">
+  <div class="hype-band">
+    <span class="hype-top" id="hypeTop">JPYC きたーー!!!</span>
+    <span class="hype-amt"><b id="hypeAmt"></b><small>JPYC</small></span>
+    <span class="hype-name" id="hypeName"></span>
+  </div>
+</div>
+
+<!-- ===== パーティクル(図形の粒)を描くキャンバス ===== -->
+<canvas class="fx" id="fx" aria-hidden="true"></canvas>
+
+</body>
+</html>

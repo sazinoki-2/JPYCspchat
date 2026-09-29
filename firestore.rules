@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// JPYCスパチャ のコメント置き場のルール
+// 保存できるのは「送金番号(文書の名前)・なまえ(n)・コメント(m)」だけ。
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /tips/{tx} {
+      // 送金番号を知っている1件だけ読める
+      allow get: if true;
+      // まとめて読み出すのは禁止
+      allow list: if false;
+      // 新しく書くときだけ許可。送金番号の形と、中身が n と m の2つだけかを確かめる
+      allow create: if tx.matches('0x[0-9a-f]{64}')
+        && request.resource.data.keys().hasOnly(['n', 'm'])
+        && request.resource.data.n is string
+        && request.resource.data.n.size() <= 32
+        && request.resource.data.m is string
+        && request.resource.data.m.size() <= 400;
+      // 書き換え・削除はできない(消したいときは Firebase の管理画面から)
+      allow update, delete: if false;
+    }
+
+    // それ以外はぜんぶ禁止
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
