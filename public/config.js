@@ -9,7 +9,7 @@
 // ============================================================
 window.JPYC_CHAT_CONFIG = {
   // WalletConnect(Reown)のプロジェクトID。https://dashboard.reown.com で無料でもらえる
-  reownProjectId: '',
+  reownProjectId: 'e65412147b0acf150e53c93aa91a895c',
 
   // Firebase(コメント置き場)。Firestore だけを使うので、プロジェクトIDだけで動く
   // (Firebaseコンソール → プロジェクトの設定 → プロジェクトID)

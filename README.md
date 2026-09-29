@@ -51,7 +51,7 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 ページは **GitHub Pages** で公開しています。`main` に push すると、GitHub Actions（`.github/workflows/deploy.yml`）が自動でビルドして公開します。
 サービス全体の設定は `public/config.js` の1か所だけです（配信者ごとの設定はありません）。
 
-> いまの状態（2026-09-29）：0（GitHub Pages）と 1（Firebase：プロジェクト `jpycspchat`）は設定ずみ。**のこりは 2 の Reown だけ**です。
+> いまの状態（2026-09-29）：0（GitHub Pages）・1（Firebase：プロジェクト `jpycspchat`）・2（Reown：プロジェクト `JPYCspchat`）すべて設定ずみです。
 
 ### 0. GitHub Pages（最初の1回だけ）
 リポジトリの **Settings → Pages → Build and deployment → Source** を **「GitHub Actions」** にする。
@@ -72,10 +72,9 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 2. 表示された Project ID を `public/config.js` の `reownProjectId` に貼る
 3. プロジェクトの「Domain」（許可するドメイン）に `https://sazinoki-2.github.io` を追加
 
-- Project ID が**まだ無いあいだ**も本番で動きます。そのあいだの払い方は「ブラウザに入っているウォレット」だけです
-  （PCの MetaMask 拡張機能、MetaMask などのウォレットアプリの中のブラウザ）。
-  ふつうのスマホのブラウザで開いた人は「POLがない人はこちら」からアドレスに直接送れます（コメントなし）。
-- Project ID を入れると、スマホの HashPort Wallet・MetaMask アプリにも WalletConnect でつながるようになります。
+- Project ID が入っているので、「ウォレット接続」を押すと **MetaMask と HashPort Wallet** が並びます
+  （`src/wallet.js` の `featuredWalletIds` / `includeWalletIds`）。スマホのふつうのブラウザからも、押せばアプリが開いてつながります。
+- Project ID を空にすると、「ブラウザに入っているウォレット」（PCの MetaMask 拡張機能、ウォレットアプリの中のブラウザ）だけで払う形になります（`src/injected.js`）。
 - Firebase の `projectId` が空のあいだは、チャット欄は「DEMO」表示で動きます（送る画面は見本で、実際には送りません）。
 
 ### 3. 公開

@@ -6,6 +6,11 @@ import { getConnection, watchConnection, switchChain, writeContract, disconnect 
 import { erc20Abi, parseUnits } from 'viem';
 import { JPYC, DECIMALS } from './chain.js';
 
+// ウォレット選びの画面に並べるウォレット。WalletConnect の公開のウォレット一覧での登録番号(秘密鍵ではない)
+// ボタンを押すと、この2つが並ぶ。スマホでは押すとそのアプリが開いてつながる
+const METAMASK = 'c57ca95b47569778a828d19178114f4db188b89b763c899ba0be274e97267d96';
+const HASHPORT = '38633830ef578a1249c345848a8d6487551a346b923d21ce197ea57f423f3113';
+
 let kit = null;
 let config = null;
 
@@ -24,6 +29,10 @@ export function initWallet(projectId) {
       url: window.location.origin,
       icons: [new URL('icon.png', window.location.href).href],
     },
+    // ウォレット選びの画面は MetaMask と HashPort Wallet だけにする(迷わないように)
+    featuredWalletIds: [METAMASK, HASHPORT],
+    includeWalletIds: [METAMASK, HASHPORT],
+    allWallets: 'HIDE',
     // よけいな機能と利用状況の送信は切っておく
     features: {
       analytics: false,
