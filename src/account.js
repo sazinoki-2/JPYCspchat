@@ -1,5 +1,7 @@
 // 自分のウォレットの係: 右上のボタン・入力欄の「自分」・送るときの接続を、ここでひとまとめにする
-// アドレスはこの端末の中だけに覚える。つなぐ部品(WalletConnect)は重いので、押したときに初めて読み込む
+// アドレスはこの端末の中だけに覚える。つなぐ部品は重いので、押したときに初めて読み込む
+// ・WalletConnect(Reown)の番号がある → wallet.js(スマホのウォレットアプリともつながる)
+// ・番号がまだ無い → injected.js(ブラウザに入っているウォレット: PCの MetaMask 拡張・ウォレットアプリの中のブラウザ)
 import { isAddress, getAddress } from 'viem';
 
 const KEY = 'jpycchat.addr';
@@ -17,7 +19,9 @@ const subs = new Set();
 export function initAccount(id) {
   projectId = id;
 }
-export const canConnect = () => Boolean(projectId);
+// ブラウザにウォレットが入っているか(MetaMask の拡張機能・ウォレットアプリの中のブラウザなど)
+export const hasInjected = () => typeof window !== 'undefined' && Boolean(window.ethereum);
+export const canConnect = () => Boolean(projectId) || hasInjected();
 export const myAddress = () => addr;
 
 // アドレスが変わったら知らせてもらう(登録したときにも1回呼ぶ)
@@ -35,15 +39,16 @@ function set(a) {
 
 async function wallet() {
   if (!W) {
-    W = await import('./wallet.js');
+    W = projectId ? await import('./wallet.js') : await import('./injected.js');
     W.initWallet(projectId);
   }
   return W;
 }
 
-// ウォレットをつなぐ(ウォレット選びの画面が出る)。つながったアドレスを返す
+// ウォレットをつなぐ(ウォレット選びの画面・ウォレットの確認が出る)。つながったアドレスを返す
+// このブラウザではつなぐ手段がないときは 'no-wallet' で失敗する
 export async function connect() {
-  if (!projectId) throw new Error('not-configured');
+  if (!canConnect()) throw new Error('no-wallet');
   const w = await wallet();
   const a = await w.connect();
   set(a);

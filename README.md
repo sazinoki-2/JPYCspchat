@@ -60,9 +60,8 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 2. 左メニュー「Firestore Database」→「データベースを作成」→ 本番環境モード、場所は `asia-northeast1`（東京）
 3. 「ルール」のタブを開き、このリポジトリの `firestore.rules` の中身をまるごと貼って「公開」
    （コマンドでやるなら `npx firebase-tools login` のあと `npm run deploy:rules -- --project <プロジェクトID>`）
-4. 歯車「プロジェクトの設定」→「マイアプリ」→ ウェブ（`</>`）を追加（Firebase Hosting はチェックしない）
-5. 表示された `apiKey` `authDomain` `projectId` `appId` を `public/config.js` の `firebase` に貼る
-   （この値はページを見た人なら誰でも見られる種類のもので、秘密の鍵ではありません。守りは `firestore.rules` でかけています）
+4. 歯車「プロジェクトの設定」の **プロジェクトID** を `public/config.js` の `firebase.projectId` に書く
+   （使うのは Firestore だけなので、`apiKey` などは要りません。いまは `jpycspchat` が入っています）
 
 最初は無料プラン（Spark）で足ります。使う配信者が増えて読み込みが1日5万回を超えるようになったら、従量課金プラン（Blaze）に切りかえます。
 
@@ -71,8 +70,11 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 2. 表示された Project ID を `public/config.js` の `reownProjectId` に貼る
 3. プロジェクトの「Domain」（許可するドメイン）に `https://sazinoki-2.github.io` を追加
 
-設定がそろうまでは、チャット欄は「DEMO」表示で動きます（送る画面は見本で、実際には送りません）。
-右上のウォレット接続も「準備中」になり、配信者はアドレスの手入力でチャット欄をつくれます。
+- Project ID が**まだ無いあいだ**も本番で動きます。そのあいだの払い方は「ブラウザに入っているウォレット」だけです
+  （PCの MetaMask 拡張機能、MetaMask などのウォレットアプリの中のブラウザ）。
+  ふつうのスマホのブラウザで開いた人は「POLがない人はこちら」からアドレスに直接送れます（コメントなし）。
+- Project ID を入れると、スマホの HashPort Wallet・MetaMask アプリにも WalletConnect でつながるようになります。
+- Firebase の `projectId` が空のあいだは、チャット欄は「DEMO」表示で動きます（送る画面は見本で、実際には送りません）。
 
 ### 3. 公開
 `public/config.js` を書きかえて `main` に push するだけです。数分で https://sazinoki-2.github.io/JPYCspchat/ に反映されます。
@@ -80,7 +82,7 @@ YouTubeライブのチャット欄のように、JPYCの投げ銭だけが流れ
 ### 秘密の情報について
 - このリポジトリに、秘密鍵・シードフレーズ（シークレットフレーズ）・パスワードは**一切入っていません**。今後も入れないでください。
 - このサービスが秘密鍵やシードフレーズを聞くことはありません。送金の承認は、いつも各自のウォレットアプリの中で行います。
-- `public/config.js` に入れる値（Firebaseの設定値・ReownのProject ID）は、公開されたページに必ず載る「表札」のようなもので、秘密ではありません。
+- `public/config.js` に入れる値（FirebaseのプロジェクトID・ReownのProject ID）は、公開されたページに必ず載る「表札」のようなもので、秘密ではありません。
 
 ### コメントを消したいとき（運営者）
 Firebaseコンソール →「Firestore Database」→ `tips` → 該当する送金番号の文書を削除。
@@ -112,7 +114,8 @@ Firebaseコンソール →「Firestore Database」→ `tips` → 該当する�
 | `src/topbar.js` | 右上のウォレットボタンとメニュー |
 | `src/chain.js` | Polygon を読む（送金の見張り・残高・確認待ち） |
 | `src/store.js` | Firebase（なまえ・コメントだけ） |
-| `src/wallet.js` | ウォレット接続（ボタンを押したときだけ読み込む） |
+| `src/wallet.js` | ウォレット接続・WalletConnect（Reown の番号があるとき。ボタンを押したときだけ読み込む） |
+| `src/injected.js` | ウォレット接続・ブラウザに入っているウォレット（Reown の番号がまだ無いとき） |
 | `src/chat.js` | チャット欄・ティッカー・効果音 |
 | `src/sheet.js` | 送る画面 |
 | `src/fx.js` | 演出（図形の粒・衝撃波・大きな帯） |

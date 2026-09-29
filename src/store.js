@@ -7,7 +7,9 @@ import { getFirestore, doc, getDoc, setDoc } from 'firebase/firestore/lite';
 let db = null;
 
 export function initStore(firebaseConfig) {
-  db = getFirestore(initializeApp(firebaseConfig));
+  // 空の項目は渡さない(Firestore だけなら projectId だけで動く)
+  const c = Object.fromEntries(Object.entries(firebaseConfig).filter(([, v]) => typeof v === 'string' && v.trim()));
+  db = getFirestore(initializeApp(c));
 }
 
 export const storeReady = () => db !== null;

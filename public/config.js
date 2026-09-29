@@ -3,20 +3,18 @@
 //  配信者ごとの「名前・受け取りアドレス」はここには書きません。
 //  配信者が右上の「配信者」ボタンでウォレットをつなぐと、その人専用のURLに入ります。
 //
-//  ここに書く値は、ページを見た人なら誰でも見られる種類のものです
-//  (Firebaseの設定値もそう。守りは firestore.rules でかけています)。
+//  ここに書く値は、ページを見た人なら誰でも見られる種類のもので、秘密ではありません
+//  (守りは firestore.rules でかけています)。秘密鍵・シードフレーズは絶対に書かないこと。
 //  書きかえて GitHub の main に push すると、自動で公開されます(GitHub Actions)。
 // ============================================================
 window.JPYC_CHAT_CONFIG = {
   // WalletConnect(Reown)のプロジェクトID。https://dashboard.reown.com で無料でもらえる
   reownProjectId: '',
 
-  // Firebase の設定(Firebaseコンソール → プロジェクトの設定 → マイアプリ の値)
+  // Firebase(コメント置き場)。Firestore だけを使うので、プロジェクトIDだけで動く
+  // (Firebaseコンソール → プロジェクトの設定 → プロジェクトID)
   firebase: {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    appId: '',
+    projectId: 'jpycspchat',
   },
 
   // 何時間前までの投げ銭をチャット欄に出すか

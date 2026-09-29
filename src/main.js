@@ -30,9 +30,13 @@ const cfg = {
   minTip: Number(raw.minTip) >= 0 ? Number(raw.minTip) : 100,
   ngWords: raw.ngWords || [],
 };
-const FB_OK = Boolean(cfg.firebase.apiKey && cfg.firebase.projectId);
+// コメント置き場は Firestore だけなので、プロジェクトIDがあれば動く(apiKey などはなくてよい)
+const FB_OK = Boolean(String(cfg.firebase.projectId || '').trim());
 const WC_OK = Boolean(cfg.reownProjectId);
-const LIVE = FB_OK && WC_OK;
+// 本番かどうかは、コメント置き場(Firebase)があるかで決める。
+// 払い方は、WalletConnect の番号があればそれ(スマホのウォレットアプリともつながる)、
+// まだ無ければブラウザに入っているウォレット(PCの MetaMask 拡張・ウォレットアプリの中のブラウザ)
+const LIVE = FB_OK;
 chat.setNgWords(cfg.ngWords);
 account.initAccount(cfg.reownProjectId);
 if (FB_OK) initStore(cfg.firebase);
@@ -156,7 +160,10 @@ async function sendLive(tip, ui) {
   let addr;
   try {
     addr = await account.connect();
-  } catch {
+  } catch (e) {
+    if (e?.message === 'no-wallet') {
+      return ui.fail('このブラウザからはウォレットにつなげません。MetaMaskなどのウォレットアプリの中のブラウザで開くか、「もどる」→「POLがない人はこちら」から直接送れます（コメントなし）。');
+    }
     return ui.fail('ウォレットにつながりませんでした。もう一度どうぞ。');
   }
   const bal = await balances(addr).catch(() => null); // 読めなくても先へ(ウォレット側でも確かめられる)

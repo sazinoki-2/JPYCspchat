@@ -25,6 +25,9 @@ const TRANSFER = parseAbiItem('event Transfer(address indexed from, address inde
 const STEP = 1000n; // 1回で読むブロック数(公開の読み取り口の上限に合わせて小さめ)
 const POLL_MS = 4000; // 新しい送金を見に行く間隔
 const BLOCK_SEC = 2.1; // Polygon の1ブロックのだいたいの秒数
+// 公開の読み取り口は、いちばん新しいブロックの直後を読むと「範囲が不正」と断ることがある
+// (中で何台かに振り分けていて、少し遅れている台がある)。なので2ブロック(約4秒)手前までを読む
+const LAG = 2n;
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // 範囲が広すぎて断られたら、半分に割って読み直す
@@ -77,7 +80,7 @@ export async function watchTips({ to, historyHours, onTips, onStatus }) {
   let last;
   for (;;) {
     try {
-      const head = await client.getBlockNumber();
+      const head = (await client.getBlockNumber()) - LAG;
       const span = BigInt(Math.round((historyHours * 3600) / BLOCK_SEC));
       const start = head > span ? head - span : 0n;
       const tips = await toTips(await getLogsRange(to, start, head));
@@ -93,7 +96,7 @@ export async function watchTips({ to, historyHours, onTips, onStatus }) {
   }
   const tick = async () => {
     try {
-      const head = await client.getBlockNumber();
+      const head = (await client.getBlockNumber()) - LAG;
       if (head > last) {
         const tips = await toTips(await getLogsRange(to, last + 1n, head));
         last = head; // 読めたときだけ進める(失敗したら次の回で同じ範囲を読み直す)

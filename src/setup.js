@@ -62,10 +62,10 @@ export async function copyText(text, btn, label) {
   setTimeout(() => { btn.textContent = label; }, 1600);
 }
 
-// ウォレットをつなぐ(運営側の設定がまだなら、そう伝える)
+// ウォレットをつなぐ(このブラウザにつなぐ手段がなければ、そう伝える)
 export async function connectOrExplain(say = (t) => toast(t)) {
   if (!account.canConnect()) {
-    say('ウォレット接続は準備中です（運営側の設定待ち）。');
+    say('このブラウザからはウォレットにつなげません。MetaMaskなどのウォレットアプリの中のブラウザで開いてください。');
     return false;
   }
   try {
