@@ -29,6 +29,20 @@ export function readPage() {
   return { to: ok ? getAddress(raw) : '', name: clean(q.get('name') || '', 16), hasTo: raw !== '', ok };
 }
 
+// 貼られた「配信者のURL」か「アドレス」から、送り先アドレスと配信者名を取り出す(だめなら null)
+export function hostFrom(text) {
+  const t = String(text || '').trim();
+  if (isAddress(t)) return { to: getAddress(t), name: '' };
+  try {
+    const q = new URLSearchParams(new URL(t).hash.slice(1));
+    const to = (q.get('to') || '').trim();
+    if (isAddress(to)) return { to: getAddress(to), name: clean(q.get('name') || '', 16) };
+  } catch {
+    /* URLの形ではない */
+  }
+  return null;
+}
+
 // QRを白黒のマス目から描いて、PNG画像で保存する(OBSの画像ソースに使える)
 export function saveQrPng(url) {
   const { data } = encode(url);
@@ -100,7 +114,8 @@ export function initCreator({ current, onCreate }) {
   function open(mode) {
     if (stop) stop();
     stop = null;
-    if (mode === 'share' || (!mode && isMine())) renderShare(current());
+    if (mode === 'guide') renderGuide();
+    else if (mode === 'share' || (!mode && isMine())) renderShare(current());
     else renderSetup();
     modal.hidden = false;
   }
@@ -184,6 +199,39 @@ export function initCreator({ current, onCreate }) {
       stop = null;
       renderShare(current(), { celebrate: true });
     });
+  }
+
+  // 送り先(配信者)がまだ決まっていないページで「JPYC」を押したとき: 配信者のURLを貼ってもらう
+  function renderGuide() {
+    win.innerHTML = `${head('送り先の配信者をえらぶ', 'sky')}
+      <div class="modal-body setup"><div class="setup-body">
+        <p class="setup-lead">このページは、まだ<b>どの配信者のチャット欄でもありません</b>。<br>
+          配信の概要欄などにある配信者のURL（<code>…/JPYCspchat/#to=0x…</code>）で開くと、その配信者に届きます。</p>
+        <label class="guide-label" for="guideUrl">配信者のURL（またはアドレス）を貼る</label>
+        <input class="mk-input mono" id="guideUrl" data-url placeholder="https://sazinoki-2.github.io/JPYCspchat/#to=0x…" spellcheck="false" autocomplete="off">
+        <button class="go-btn" type="button" data-go>この配信者のチャット欄をひらく<i aria-hidden="true"></i></button>
+        <p class="mk-err" data-err role="alert"></p>
+        <p class="setup-note">配信者のかたは、<a href="#" data-setup>ここから自分のチャット欄をつくれます</a>（登録なし・無料）。</p>
+      </div></div>`;
+    const q = (sel) => win.querySelector(sel);
+    const say = (t) => { q('[data-err]').textContent = t; };
+    q('[data-close]').addEventListener('click', close);
+    const go = () => {
+      const h = hostFrom(q('[data-url]').value);
+      if (!h) {
+        say('形がちがいます。「#to=0x…」がついた配信者のURLか、0x から始まるアドレスを貼ってください。');
+        return;
+      }
+      // 貼られたURLからは「送り先アドレスと名前」だけを使い、開くのはこのサービスのページ(ほかのサイトへは飛ばない)
+      window.location.href = pageUrl(h.to, h.name);
+    };
+    q('[data-go]').addEventListener('click', go);
+    q('[data-url]').addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.isComposing) go(); });
+    q('[data-setup]').addEventListener('click', (e) => {
+      e.preventDefault();
+      renderSetup();
+    });
+    setTimeout(() => q('[data-url]')?.focus(), 50);
   }
 
   // 「あなたのチャット欄」(URLとQR)

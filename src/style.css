@@ -363,6 +363,9 @@ html.obs .bgpat{display:none}
 .setup .btn-ink{margin-top:8px}
 .setup .go-btn{margin-top:18px;font-size:15px}
 .setup-note{margin:12px 0 0;font-size:11px;font-weight:700;line-height:1.65}
+.setup-note a{color:inherit;font-weight:900}
+.setup-lead code{padding:0 3px;border:1.5px solid var(--ink);background:var(--white);font-family:ui-monospace,Consolas,monospace;font-size:11.5px;word-break:break-all}
+.guide-label{display:block;font-size:12.5px;font-weight:900}
 .pin-body > p{margin:0 0 10px;font-size:12.5px;font-weight:700;line-height:1.65}
 .btn-ink{
   display:inline-flex;align-items:center;gap:10px;height:42px;padding:0 16px;border:0;

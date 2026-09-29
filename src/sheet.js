@@ -126,7 +126,9 @@ export function initSheet({ receiveAddress, streamerName, onSend }) {
         li.className = i < at || name === 'done' ? 'done' : i === at ? 'now' : '';
       }
       payMsg.className = 'pay-msg';
-      payMsg.textContent = name === 'approve' ? 'ウォレットのアプリに確認が届いています。承認してください。' : '';
+      payMsg.textContent = name === 'approve'
+        ? 'ウォレットに確認が届いています。承認してください（先に「Polygon に切りかえ」の確認が出ることがあります）。'
+        : '';
     },
     done(text) {
       ui.step('done');

@@ -214,13 +214,25 @@ async function sendDemo(tip, ui) {
 // ===== はじめる =====
 // 右上の「配信者」ボタンで出るウィンドウ。「この画面を自分のチャット欄にする」を押すと、
 // 画面はそのまま、URLだけをその人専用にする(読み込み直しはしない)
-initCreator({
+const creator = initCreator({
   current: () => current,
   onCreate(to, name) {
     current = { to, name, url: pageUrl(to, name) };
     window.history.replaceState(null, '', current.url);
     startChat(Promise.resolve());
   },
+});
+
+// 送り先(配信者)がまだ決まっていないページで「JPYC」を押したら、送り先をえらぶ案内を出す
+// (この画面を自分のチャット欄にしたあとは、ふつうの送る画面になる)
+const askHost = (e) => {
+  if (current) return;
+  e.preventDefault();
+  creator.open('guide');
+};
+document.getElementById('jpycBtn').addEventListener('click', askHost);
+document.getElementById('msgIn').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) askHost(e);
 });
 const chatEl = document.getElementById('chat');
 if (current) startChat(playIntro(`${current.name} のチャット欄`, chatEl));

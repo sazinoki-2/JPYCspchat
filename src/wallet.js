@@ -18,10 +18,17 @@ export function initWallet(projectId) {
   if (kit) return;
   const adapter = new WagmiAdapter({ projectId, networks: [polygon] });
   config = adapter.wagmiConfig;
+  // つなぐときはネットワークを切りかえない。MetaMask が Ethereum などにいると、接続を承認したあとに
+  // 「Polygon に切りかえ」の確認が別に出て、それに気づかないと「接続中」のまま止まって見えるため。
+  // Polygon への切りかえは、送るとき(sendJPYC)にお願いする
+  const connectAsIs = adapter.connect.bind(adapter);
+  adapter.connect = (params) => connectAsIs({ ...params, chainId: undefined });
   kit = createAppKit({
     adapters: [adapter],
     networks: [polygon],
     defaultNetwork: polygon,
+    // つないだウォレットが Polygon 以外にいても、「ネットワークがちがう」画面を出さない(送るときに切りかえる)
+    allowUnsupportedChain: true,
     projectId,
     metadata: {
       name: 'JPYCスパチャ',
