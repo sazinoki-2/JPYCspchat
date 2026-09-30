@@ -9,7 +9,7 @@ import { initSheet } from './sheet.js';
 import { initStore, loadComment, saveComment, storeReady } from './store.js';
 import { watchTips, balances, waitReceipt } from './chain.js';
 import * as account from './account.js';
-import { readPage, pageUrl, initCreator } from './setup.js';
+import { readPage, pageUrl, initCreator, BAD_URL } from './setup.js';
 import { initTopbar } from './topbar.js';
 import { initBackground } from './bg.js';
 
@@ -236,4 +236,9 @@ document.getElementById('msgIn').addEventListener('keydown', (e) => {
 });
 const chatEl = document.getElementById('chat');
 if (current) startChat(playIntro(`${current.name} のチャット欄`, chatEl));
-else playIntro('あなたの投げ銭チャット欄', chatEl);
+else {
+  playIntro('あなたの投げ銭チャット欄', chatEl).then(() => {
+    // 送り先がついているのに形がおかしいURL(途中で切れた など)で開いたときは、そう伝える
+    if (page.hasTo) chat.toast(BAD_URL, 15000);
+  });
+}

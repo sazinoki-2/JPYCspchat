@@ -29,6 +29,9 @@ export function readPage() {
   return { to: ok ? getAddress(raw) : '', name: clean(q.get('name') || '', 16), hasTo: raw !== '', ok };
 }
 
+// 送り先アドレスの形がおかしいURLで開いたときのお知らせ
+export const BAD_URL = 'このURLの送り先アドレスがまちがっています（途中で切れているかもしれません）。配信者のURLをもう一度たしかめてください。';
+
 // 貼られた「配信者のURL」か「アドレス」から、送り先アドレスと配信者名を取り出す(だめなら null)
 export function hostFrom(text) {
   const t = String(text || '').trim();
@@ -216,6 +219,8 @@ export function initCreator({ current, onCreate }) {
     const q = (sel) => win.querySelector(sel);
     const say = (t) => { q('[data-err]').textContent = t; };
     q('[data-close]').addEventListener('click', close);
+    // 開いたURLに送り先がついているのに形がおかしい(途中で切れた など)ときは、そう伝える
+    if (readPage().hasTo) say(BAD_URL);
     const go = () => {
       const h = hostFrom(q('[data-url]').value);
       if (!h) {
