@@ -1,12 +1,12 @@
 // テスト B(ウォレット接続)
-import { launch, close, open, check, summary, sleep, hostUrl, txt, deepList, deepClick, modalOpen, connectMetaMask, SA, FAKE_STREAMER, FAKE_VIEWER } from './harness.mjs';
+import { launch, close, open, check, summary, sleep, hostUrl, txt, deepList, deepClick, modalOpen, connectMetaMask, FAKE_STREAMER, FAKE_VIEWER } from './harness.mjs';
 
 await launch();
 const names = (list) => list.map((w) => `${w.name}${w.tag ? `(${w.tag})` : ''}`).join(' / ');
 
 // B1 PC(ウォレットなし)の選択画面
 {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'));
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'));
   await sleep(6000);
   await page.click('#walletBtn');
   let list = [];
@@ -17,7 +17,7 @@ const names = (list) => list.map((w) => `${w.name}${w.tag ? `(${w.tag})` : ''}`)
 
 // B2 スマホ(ウォレットなし)の選択画面
 {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'), { mobile: true });
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { mobile: true });
   await sleep(6000);
   await page.click('#walletBtn');
   let list = [];
@@ -28,7 +28,7 @@ const names = (list) => list.map((w) => `${w.name}${w.tag ? `(${w.tag})` : ''}`)
 
 // B3・B4 MetaMask(Polygon にいる / Ethereum にいる)
 for (const [id, chain, label] of [['B3', '0x89', 'Polygon'], ['B4', '0x1', 'Ethereum']]) {
-  const { page, log, ctx } = await open(hostUrl(SA, 'sa'), { wallet: { account: FAKE_VIEWER, chain } });
+  const { page, log, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { wallet: { account: FAKE_VIEWER, chain } });
   await sleep(6000);
   const sec = await connectMetaMask(page);
   const s = await page.evaluate(() => ({ label: document.getElementById('walletLabel').textContent, me: document.getElementById('meAddr').textContent, switchAsked: window.__w.switchAsked }));
@@ -38,7 +38,7 @@ for (const [id, chain, label] of [['B3', '0x89', 'Polygon'], ['B4', '0x1', 'Ethe
 
 // B5 接続をことわった
 {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'), { wallet: { account: FAKE_VIEWER, rejectConnect: true } });
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { wallet: { account: FAKE_VIEWER, rejectConnect: true } });
   await sleep(6000);
   await page.click('#walletBtn');
   for (let i = 0; i < 30 && !(await deepList(page, 'W3M-LIST-WALLET')).length; i++) await sleep(300);
@@ -60,7 +60,7 @@ for (const [id, chain, label] of [['B3', '0x89', 'Polygon'], ['B4', '0x1', 'Ethe
 
 // B6 切る → もう一度つなぐ
 {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'), { wallet: { account: FAKE_VIEWER } });
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { wallet: { account: FAKE_VIEWER } });
   await sleep(6000);
   await connectMetaMask(page);
   await page.click('#walletBtn');
@@ -77,7 +77,7 @@ for (const [id, chain, label] of [['B3', '0x89', 'Polygon'], ['B4', '0x1', 'Ethe
 
 // B7 再読み込みしても覚えている
 {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'), { wallet: { account: FAKE_VIEWER } });
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { wallet: { account: FAKE_VIEWER } });
   await sleep(6000);
   await connectMetaMask(page);
   await page.reload({ waitUntil: 'domcontentloaded' });
@@ -108,7 +108,7 @@ for (const [id, chain, label] of [['B3', '0x89', 'Polygon'], ['B4', '0x1', 'Ethe
 
 // B9 HashPort(スマホはアプリを開く・PCはQR)
 for (const [id, mobile] of [['B9-スマホ', true], ['B9-PC', false]]) {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'), { mobile });
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { mobile });
   await page.evaluateOnNewDocument(() => {});
   await page.evaluate(() => { window.__opened = []; window.open = (u) => { window.__opened.push(String(u)); return null; }; });
   await sleep(6000);

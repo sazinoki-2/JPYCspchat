@@ -7,7 +7,14 @@ import puppeteer from 'puppeteer-core';
 // 確かめるページ(ふだんは本番)。BASE_URL で変えられる
 export const BASE = process.env.BASE_URL || 'https://sazinoki-2.github.io/JPYCspchat/';
 export const JPYC = '0xE7C3D8C9a439feDe00D2600032D5dB0Be71C3c29';
-export const SA = '0x0000000000000000000000000000000000000000'; // (実在のアドレスは外から渡す)
+// 実在の投げ銭を使う確認(任意)。アドレスは書かずに、外から渡す
+//   例: REAL_HOST=0x…(配信者のアドレス) REAL_TIP="なまえ 100 JPYC コメント"(そのページに出るはずのカード) npm run test:e2e
+export const REAL_HOST = process.env.REAL_HOST || '';
+export const REAL_TIP = process.env.REAL_TIP || '';
+export const short = (a) => `${a.slice(0, 6)}…${a.slice(-4)}`;
+export function skip(id, name, why) {
+  console.log(`SKIP  ${id}  ${name}  … ${why}`);
+}
 export const FAKE_STREAMER = '0x5ccff2ffcc00141414ffffff5ccff2ffcc001414'; // 実在の送金がないテスト用の配信者
 export const FAKE_VIEWER = '0x7e57000000000000000000000000000000007e57'; // テスト用の視聴者(残高は差しかえで決める)
 export const FAKE_HASH = `0x${'ab'.repeat(32)}`;

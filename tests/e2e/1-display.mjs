@@ -1,5 +1,5 @@
 // テスト A(表示)・E(故障への強さ)
-import { launch, close, open, check, summary, sleep, url, hostUrl, txt, pad32, BASE, JPYC, SA, FAKE_STREAMER, TRANSFER_TOPIC, RPC_HOSTS } from './harness.mjs';
+import { launch, close, open, check, summary, sleep, url, hostUrl, txt, pad32, BASE, JPYC, REAL_HOST, REAL_TIP, skip, FAKE_STREAMER, TRANSFER_TOPIC, RPC_HOSTS } from './harness.mjs';
 
 await launch();
 
@@ -19,14 +19,15 @@ await launch();
   await ctx.close();
 }
 
-// A2 本人の配信者URL(実在の投げ銭が並ぶ)
-{
-  const { page, log, ctx } = await open(hostUrl(SA, 'sa'), { mobile: true });
+// A2 実在の配信者URL(実在の投げ銭が並ぶ)。REAL_HOST・REAL_TIP があるときだけ
+if (!REAL_HOST) skip('A2', '実在の配信者URL', 'REAL_HOST が未指定');
+else {
+  const { page, log, ctx } = await open(hostUrl(REAL_HOST, '実在テスト'), { mobile: true });
   let tips = [];
   for (let i = 0; i < 30 && !tips.length; i++) { await sleep(1000); tips = await page.evaluate(() => [...document.querySelectorAll('#feed .tip')].map((t) => t.innerText.replace(/\s+/g, ' ').trim())); }
-  check('A2-1', '配信者URLのヘッダーに名前', (await txt(page, '#hostName')) === 'sa');
-  check('A2-2', 'ページの題名に配信者名', (await page.title()) === 'sa のJPYCスパチャ', await page.title());
-  check('A2-3', '実在の投げ銭(a 100 JPYC a)が並ぶ', tips.some((t) => t === 'a 100 JPYC a'), JSON.stringify(tips));
+  check('A2-1', '配信者URLのヘッダーに名前', (await txt(page, '#hostName')) === '実在テスト');
+  check('A2-2', 'ページの題名に配信者名', (await page.title()) === '実在テスト のJPYCスパチャ', await page.title());
+  check('A2-3', `実在の投げ銭(${REAL_TIP})が並ぶ`, !REAL_TIP || tips.some((t) => t === REAL_TIP), JSON.stringify(tips));
   check('A2-4', 'エラーなし', log.errors.length === 0, log.errors.join(' / '));
   await ctx.close();
 }
@@ -102,30 +103,32 @@ for (const [w, mobile] of [[320, true], [390, true], [768, false], [1280, false]
   await ctx.close();
 }
 
-// E1 いちばん目の読み取り口が落ちていても、予備で読める
-{
-  const { page, log, ctx } = await open(hostUrl(SA, 'sa'), { mobile: true, rpc: { block: ['polygon-bor-rpc.publicnode.com'] } });
+// E1 いちばん目の読み取り口が落ちていても、予備で読める(REAL_HOST があるときだけ)
+if (!REAL_HOST) skip('E1', '読み取り口1つが落ちても予備で並ぶ', 'REAL_HOST が未指定');
+else {
+  const { page, log, ctx } = await open(hostUrl(REAL_HOST, '実在テスト'), { mobile: true, rpc: { block: ['polygon-bor-rpc.publicnode.com'] } });
   let tips = [];
   for (let i = 0; i < 40 && !tips.length; i++) { await sleep(1000); tips = await page.evaluate(() => [...document.querySelectorAll('#feed .tip')].map((t) => t.innerText.replace(/\s+/g, ' ').trim())); }
-  check('E1', '読み取り口1つが落ちても予備で並ぶ', tips.some((t) => t === 'a 100 JPYC a'), `止めた通信 ${log.aborted}件 / ${JSON.stringify(tips)}`);
+  check('E1', '読み取り口1つが落ちても予備で並ぶ', tips.length > 0 && (!REAL_TIP || tips.some((t) => t === REAL_TIP)), `止めた通信 ${log.aborted}件 / ${JSON.stringify(tips)}`);
   await ctx.close();
 }
 
 // E2 読み取り口が全部落ちたら、お知らせが出る
 {
-  const { page, ctx } = await open(hostUrl(SA, 'sa'), { mobile: true, rpc: { block: RPC_HOSTS } });
+  const { page, ctx } = await open(hostUrl(FAKE_STREAMER, 'テスト'), { mobile: true, rpc: { block: RPC_HOSTS } });
   let t = '';
   for (let i = 0; i < 40 && !t; i++) { await sleep(1000); t = await page.evaluate(() => (document.getElementById('toast').hidden ? '' : document.getElementById('toast').textContent)); }
   check('E2', '全部落ちたら「読み込みが止まっています」', /チェーンの読み込みが止まっています/.test(t), t);
   await ctx.close();
 }
 
-// E3 コメント置き場に届かなくても、投げ銭は並ぶ(名前はアドレス)
-{
-  const { page, log, ctx } = await open(hostUrl(SA, 'sa'), { mobile: true, firestore: 'block' });
+// E3 コメント置き場に届かなくても、投げ銭は並ぶ(名前はアドレス)。REAL_HOST があるときだけ
+if (!REAL_HOST) skip('E3', 'コメント置き場が落ちても投げ銭は並ぶ', 'REAL_HOST が未指定');
+else {
+  const { page, log, ctx } = await open(hostUrl(REAL_HOST, '実在テスト'), { mobile: true, firestore: 'block' });
   let tips = [];
   for (let i = 0; i < 30 && !tips.length; i++) { await sleep(1000); tips = await page.evaluate(() => [...document.querySelectorAll('#feed .tip')].map((t) => t.innerText.replace(/\s+/g, ' ').trim())); }
-  check('E3', 'コメント置き場が落ちても投げ銭は並ぶ', tips.some((t) => /^0xb8B6…1507 100 JPYC$/.test(t)), `${JSON.stringify(tips)} / pageerror ${log.errors.filter((e) => !/Failed to load resource|ERR_FAILED|firestore/i.test(e)).length}`);
+  check('E3', 'コメント置き場が落ちても投げ銭は並ぶ', tips.some((t) => /^0x[0-9a-fA-F]{4}…[0-9a-fA-F]{4} [\d,]+ JPYC$/.test(t)), `${JSON.stringify(tips)} / pageerror ${log.errors.filter((e) => !/Failed to load resource|ERR_FAILED|firestore/i.test(e)).length}`);
   await ctx.close();
 }
 
