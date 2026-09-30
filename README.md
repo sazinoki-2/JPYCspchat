@@ -126,8 +126,12 @@ Firebaseコンソール →「Firestore Database」→ `tips` → 該当する�
 | `firestore.rules` | Firebase のルール |
 | `vite.config.js` | ビルドの設定（サブフォルダで公開しても動くよう相対パスに） |
 | `.github/workflows/deploy.yml` | push したら GitHub Pages に自動で公開する手順 |
+| `tests/e2e/` | 本番ページの自動テスト（`npm run test:e2e`） |
 
 ## 開発
 - `npm install` → `npm run dev` で手元確認（http://localhost:5173）。チャット欄は `http://localhost:5173/#to=<アドレス>&name=<名前>`
 - `npm run build` で `dist/` にできるものが、そのまま GitHub Pages に載ります（`vite.config.js` で相対パスにしているので、サブフォルダでも動きます）
+- `npm run test:e2e` で、本番ページを自動テストします（表示・ウォレット接続・送る・配信者URLの作成・故障への強さなど 68 項目）。
+  テスト用の偽ウォレット（MetaMask と同じ名乗り方）を使い、送金はその中で止めます。Firebase への書き込みもテスト側で受け止めるので、**本物のお金もデータも動きません**。
+  パソコンの Chrome を使います（場所がちがうときは `CHROME_PATH`、ほかのURLを確かめるときは `BASE_URL` で指定）。
 - 開発中だけ：URLに `?slow=5` でオープニングをゆっくり再生、ブラウザのコンソールで `__testTip(10000)` のように金額指定のテスト
